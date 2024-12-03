@@ -2,9 +2,9 @@ name: Delete Completed Todoist Tasks
 
 on:
   schedule:
-    # 매일 자정에 실행되도록 설정 (UTC 기준)
+   
     - cron: '0 0 * * *'
-    workflow_dispatch:  # 수동 실행을 위한 이벤트 추가
+    workflow_dispatch: 
 
 jobs:
   delete_completed_tasks:
@@ -18,15 +18,15 @@ jobs:
         env:
           TODOIST_API_TOKEN: ${{ secrets.TODOIST_API_TOKEN }}
         run: |
-          # 필요한 도구 설치 (curl 사용)
+        
           curl -s https://raw.githubusercontent.com/cli/cli/trunk/script/install.sh | bash
           
-          # Todoist API를 호출하여 완료된 작업을 삭제하는 코드
+         
           curl -X POST "https://api.todoist.com/sync/v8/completed/get" \
             -H "Authorization: Bearer $TODOIST_API_TOKEN" \
             -d 'filter="completed_since:today"' > completed_tasks.json
 
-          # 완료된 작업을 JSON에서 읽어 삭제
+       
           cat completed_tasks.json | jq -r '.items[].id' | while read task_id; do
             curl -X POST "https://api.todoist.com/sync/v8/completed/delete" \
               -H "Authorization: Bearer $TODOIST_API_TOKEN" \
