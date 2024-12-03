@@ -17,8 +17,6 @@ jobs:
         env:
           TODOIST_API_TOKEN: ${{ secrets.TODOIST_API_TOKEN }}
         run: |
-        
-          curl -s https://raw.githubusercontent.com/cli/cli/trunk/script/install.sh | bash
           
          
           curl -X POST "https://api.todoist.com/sync/v8/completed/get" \
