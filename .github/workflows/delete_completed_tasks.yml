@@ -19,7 +19,7 @@ jobs:
         run: |
           
          
-          curl -X POST "https://api.todoist.com/sync/v8/completed/get" \
+          curl -X POST "https://api.todoist.com/sync/v9/completed/get" \
             -H "Authorization: Bearer $TODOIST_API_TOKEN" \
             -d 'filter="completed_since:today"' > completed_tasks.json
 
