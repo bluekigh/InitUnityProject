@@ -20,11 +20,11 @@ jobs:
         # Install jq (JSON 처리 도구)
         sudo apt-get install jq
 
-        # Todoist API에서 완료된 작업을 가져옵니다
+        # Todoist API에서 완료된 작업을 가져옵니다 (completed=true로 수정)
         response=$(curl -s \
           -X GET \
           -H "Authorization: Bearer $TODOIST_API_KEY" \
-          "https://api.todoist.com/rest/v2/tasks?filter=completed")
+          "https://api.todoist.com/rest/v2/tasks?completed=true")
 
         # 응답이 JSON인지 확인
         echo "Response: $response"
