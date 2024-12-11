@@ -15,7 +15,7 @@ jobs:
 
     - name: Delete completed tasks in Todoist
       env:
-        TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
+        TODOIST_API_KEY: 9e6772f80de315c2e99ac1d84968f7dd72b764de
       run: |
         # Install jq (JSON 처리 도구)
         sudo apt-get install jq
