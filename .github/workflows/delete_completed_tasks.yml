@@ -3,6 +3,7 @@ name: Delete Completed Todoist Tasks
 on:
   schedule:
     - cron: '0 0 * * *'  # 매일 자정에 실행 (UTC 기준)
+  workflow_dispatch:
 
 jobs:
   delete_completed_tasks:
