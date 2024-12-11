@@ -3,7 +3,7 @@ name: Delete Completed Todoist Tasks
 on:
   schedule:
     - cron: '0 0 * * *'  # 매일 자정에 실행 (UTC 기준)
-  workflow_dispatch:
+  workflow_dispatch:  # 수동 실행 가능
 
 jobs:
   delete_completed_tasks:
@@ -21,13 +21,22 @@ jobs:
         sudo apt-get install jq
 
         # Todoist API에서 완료된 작업을 가져옵니다
-        completed_tasks=$(curl -s \
+        response=$(curl -s \
           -X GET \
           -H "Authorization: Bearer $TODOIST_API_KEY" \
           "https://api.todoist.com/rest/v2/tasks?filter=completed")
 
-        # 완료된 작업이 있을 경우 삭제합니다
-        echo "$completed_tasks" | jq -r '.[].id' | while read task_id; do
+        # 응답이 JSON인지 확인
+        echo "Response: $response"
+
+        # JSON 응답이 비어있거나 형식이 잘못되었으면 오류 메시지 출력
+        if [[ "$response" == *"error"* ]]; then
+          echo "Error: $response"
+          exit 1
+        fi
+
+        # 완료된 작업 ID 추출하여 삭제
+        echo "$response" | jq -r '.[].id' | while read task_id; do
           echo "Deleting task with ID: $task_id"
           curl -s \
             -X DELETE \
