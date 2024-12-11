@@ -1,31 +1,35 @@
 name: Delete Completed Todoist Tasks
 
 on:
-  schedule: 
-    - cron: '0 0 * * *'
-  workflow_dispatch: 
+  schedule:
+    - cron: '0 0 * * *'  # 매일 자정에 실행 (UTC 기준)
 
 jobs:
   delete_completed_tasks:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Delete completed tasks in Todoist
-        env:
-          TODOIST_API_TOKEN: ${{ secrets.TODOIST_API_TOKEN }}
-        run: |
-          
-         
-          curl -X POST "https://api.todoist.com/sync/v9/completed/get" \
-            -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-            -d 'filter="completed_since:today"' > completed_tasks.json
+    - name: Delete completed tasks in Todoist
+      env:
+        TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
+      run: |
+        # Install jq (JSON 처리 도구)
+        sudo apt-get install jq
 
-       
-          cat completed_tasks.json | jq -r '.items[].id' | while read task_id; do
-            curl -X POST "https://api.todoist.com/sync/v8/completed/delete" \
-              -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-              -d "task_id=$task_id"
-          done
+        # Todoist API에서 완료된 작업을 가져옵니다
+        completed_tasks=$(curl -s \
+          -X GET \
+          -H "Authorization: Bearer $TODOIST_API_KEY" \
+          "https://api.todoist.com/rest/v2/tasks?filter=completed")
+
+        # 완료된 작업이 있을 경우 삭제합니다
+        echo "$completed_tasks" | jq -r '.[].id' | while read task_id; do
+          echo "Deleting task with ID: $task_id"
+          curl -s \
+            -X DELETE \
+            -H "Authorization: Bearer $TODOIST_API_KEY" \
+            "https://api.todoist.com/rest/v2/tasks/$task_id"
+        done
