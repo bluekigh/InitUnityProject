@@ -15,29 +15,32 @@ jobs:
 
     - name: Delete completed tasks in Todoist
       env:
-        TODOIST_API_KEY: 9e6772f80de315c2e99ac1d84968f7dd72b764de
+        TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
       run: |
-        # Install jq (JSON 처리 도구)
-        sudo apt-get install jq
+        # jq 설치 (필요시, jq가 미리 설치된 Docker 이미지를 사용할 수 있음)
+        sudo apt-get install -y jq
 
-        # Todoist API에서 완료된 작업을 가져옵니다 (completed=true로 수정)
+        # Todoist API에서 완료된 작업을 가져옵니다
         response=$(curl -s \
           -X GET \
           -H "Authorization: Bearer $TODOIST_API_KEY" \
-          "https://api.todoist.com/rest/v2/tasks?is_completed=true")
+          "https://api.todoist.com/sync/v9/completed/get")
 
-        # 응답이 JSON인지 확인
-        echo "Response: $response"
+        # 응답이 비어있거나 형식이 잘못되었으면 처리
+        if [[ -z "$response" || "$response" == "{}" ]]; then
+          echo "완료된 작업이 없습니다."
+          exit 0
+        fi
 
-        # JSON 응답이 비어있거나 형식이 잘못되었으면 오류 메시지 출력
+        # 응답에 오류가 포함되어 있는지 확인
         if [[ "$response" == *"error"* ]]; then
-          echo "Error: $response"
+          echo "오류 발생: $response"
           exit 1
         fi
 
-        # 완료된 작업 ID 추출하여 삭제
-        echo "$response" | jq -r '.[].id' | while read task_id; do
-          echo "Deleting task with ID: $task_id"
+        # 완료된 작업 ID를 추출하고 삭제
+        echo "$response" | jq -r '.items[] | .id' | while read task_id; do
+          echo "삭제 중인 작업 ID: $task_id"
           curl -s \
             -X DELETE \
             -H "Authorization: Bearer $TODOIST_API_KEY" \
