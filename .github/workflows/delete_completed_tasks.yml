@@ -24,7 +24,7 @@ jobs:
         response=$(curl -s \
           -X GET \
           -H "Authorization: Bearer $TODOIST_API_KEY" \
-          "https://api.todoist.com/sync/v8/completed/get")
+          "https://api.todoist.com/sync/v9/completed/get")
 
         # 응답이 비어있거나 형식이 잘못되었으면 처리
         if [[ -z "$response" || "$response" == "{}" ]]; then
